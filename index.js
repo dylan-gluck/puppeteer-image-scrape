@@ -28,19 +28,21 @@ async function download(url, filepath) {
       "The base URL to use for crawl (required)"
     )
     .option("-s, --select <string>", "CSS selector for images", "img")
+    .option("-n, --next <string>", "CSS selector for link to next page")
+    .option("-l, --limit <int>", "Maximum number of pages to crawl", 10)
     .parse();
 
   // Get Options
-  const options = program.opts();
+  const { url: baseUrl, select, next, limit } = program.opts();
 
-  const baseUrl = options.url;
-  const select = options.select;
+  // Set Current Page Index = 0
+  let index = 0;
 
   // Scrape Page Function
   async function scrapePage(url, selector, page) {
     // Load page
     await page.goto(url);
-    console.log("Starting on: ", url);
+    console.log("Starting on:", url);
 
     // Wait for selector
     await page.waitForSelector(selector);
@@ -63,6 +65,18 @@ async function download(url, filepath) {
     }
 
     console.log("Completed page");
+
+    // Crawl?
+    if (next && index < limit) {
+      // Increment index
+      index++;
+      // Get URL
+      const nextUrl = await page.evaluate((next) => {
+        return document.querySelector(next).href;
+      }, next);
+      // Scrape Next Page
+      await scrapePage(nextUrl, select, page);
+    }
   }
 
   // Init Puppeteer
@@ -73,6 +87,7 @@ async function download(url, filepath) {
   await scrapePage(baseUrl, select, page);
 
   // Done
+  console.log("Crawl complete, exiting.");
   await browser.close();
   process.exit();
 })();
