@@ -1,0 +1,11 @@
+{
+  "name": "puppeteer-image-scrape",
+  "version": "0.0.1",
+  "description": "Script to scrape a url for images using puppeteer. Used to collect training data for diffusion models.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC"
+}
